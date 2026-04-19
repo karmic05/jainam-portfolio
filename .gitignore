@@ -1,0 +1,16 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+node_modules/
+.vercel/
+.env
+.env.local
+.env.*.local
