@@ -845,7 +845,7 @@ footer{
         <div class="label">Increase in qualified leads at Runwal Group</div>
       </div>
       <div class="metric">
-        <div class="num" data-count="12" data-prefix="">+</div>
+        <div class="num" data-count="15" data-prefix="">+</div>
         <div class="label">End-to-end analytics projects shipped</div>
       </div>
       <div class="metric">
@@ -884,7 +884,7 @@ footer{
 
         <div class="highlights">
           <div class="highlight"><span class="ic">🎯</span>Actively seeking Analytics / BI roles · Aug 2026</div>
-          <div class="highlight"><span class="ic">🧠</span>3+ yrs BI · 12+ analytics projects shipped</div>
+          <div class="highlight"><span class="ic">🧠</span>3+ yrs BI · 15+ analytics projects shipped</div>
           <div class="highlight"><span class="ic">📊</span>Power BI · Tableau · SQL · Python · R</div>
           <div class="highlight"><span class="ic">🌐</span>English &amp; Hindi · US work authorized (F-1 OPT)</div>
         </div>
@@ -1069,15 +1069,15 @@ footer{
 <section id="projects" data-page="projects">
   <div class="container">
     <div class="section-label">// portfolio</div>
-    <h2 class="section-title">Twelve shipped <span class="serif">projects</span>.</h2>
+    <h2 class="section-title">Fifteen shipped <span class="serif">projects</span>.</h2>
     <p class="section-sub">Filter by discipline below. Each card links the stack, the core problem, and the quantified result.</p>
 
     <div class="projects-filter" id="projectsFilter">
-      <button class="filter-btn active" data-filter="all">All <span class="count">12</span></button>
-      <button class="filter-btn" data-filter="ml">Machine Learning <span class="count">5</span></button>
+      <button class="filter-btn active" data-filter="all">All <span class="count">15</span></button>
+      <button class="filter-btn" data-filter="ml">Machine Learning <span class="count">6</span></button>
       <button class="filter-btn" data-filter="nlp">NLP <span class="count">2</span></button>
-      <button class="filter-btn" data-filter="bi">BI &amp; SQL <span class="count">3</span></button>
-      <button class="filter-btn" data-filter="eda">EDA &amp; Stats <span class="count">2</span></button>
+      <button class="filter-btn" data-filter="bi">BI &amp; SQL <span class="count">4</span></button>
+      <button class="filter-btn" data-filter="eda">EDA &amp; Stats <span class="count">3</span></button>
     </div>
 
     <div class="projects-grid" id="projectsGrid">
@@ -1396,6 +1396,27 @@ const PROJECTS = [
     desc:'World Bank demographics analysis across Southern Americas &amp; Caribbean vs. global averages. Found 8.15% higher youth literacy and 17.58% higher urbanization — but a sharp tech-export gap (0.08% vs. 0.22%).',
     stack:['Python','Pandas','NumPy','Matplotlib','Seaborn'],
     metrics:[{k:'Literacy',v:'+8.15%',c:true},{k:'Urban',v:'+17.58%'},{k:'Tech gap',v:'-64%'}]
+  },
+  {
+    cat:'bi', num:'13',
+    title:'Marriott Workforce Compliance BI',
+    desc:'Reconciled disconnected Kronos + WhenToWork HR systems across 146 employees and 18 bi-weekly pay periods — 36,771 rounded hours against $777K payroll. Eight DAX measures surfaced 6 ceiling breaches carrying $259,956 annual union-liability exposure neither system tracked.',
+    stack:['Power BI','DAX','Power Query (M)','Star Schema','ETL'],
+    metrics:[{k:'Exposure',v:'$259K',c:true},{k:'Employees',v:'146'},{k:'Hours',v:'36.7K'}]
+  },
+  {
+    cat:'bi', num:'14',
+    title:'RH White Glove Delivery Pricing',
+    desc:'Operations optimization on 20 Bay Area deliveries exposing a -199.8% gross margin and $460 per-delivery loss under the flat $299 fee. Tiered pricing + route optimization recommendation cut 32 miles and 18.4kg CO₂ while realigning revenue with cost curves.',
+    stack:['Optimization','Route Opt.','Cost-Margin','Power BI','Pricing'],
+    metrics:[{k:'Margin',v:'-199.8%',c:true},{k:'Loss/order',v:'$460'},{k:'CO₂ cut',v:'18.4kg'}]
+  },
+  {
+    cat:'ml', num:'15',
+    title:'Chase the Right Mortgage — NAF',
+    desc:'Binary classification on 3,529 mortgage applications vs. 19.3K credit accounts, quantifying a 35.8% mid-funnel fallout. Achieved Test F1 of 0.86 vs. Train 0.84 — strong generalization — with $100K+ income, 20–30% utilization, and 200–300 months of history as top predictors.',
+    stack:['Python','scikit-learn','ETL','F1 Opt.','Feature Eng.','Power BI'],
+    metrics:[{k:'Test F1',v:'0.86',c:true},{k:'Applications',v:'3,529'},{k:'Success',v:'64.2%'}]
   }
 ];
 
