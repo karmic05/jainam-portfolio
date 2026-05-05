@@ -391,6 +391,16 @@ section[data-page].page-active{display:block;animation:pageEnter .5s cubic-bezie
   letter-spacing:-0.02em;margin-bottom:24px;
   box-shadow:0 10px 40px rgba(0,229,255,0.3);
 }
+.about-card .avatar{
+  position:relative;width:108px;height:108px;border-radius:24px;
+  padding:2px;margin-bottom:24px;
+  background:linear-gradient(135deg,var(--cyan) 0%,var(--magenta) 60%,var(--lime) 100%);
+  box-shadow:0 14px 40px rgba(0,229,255,0.28);
+}
+.about-card .avatar img{
+  width:100%;height:100%;border-radius:22px;object-fit:cover;
+  display:block;background:var(--bg-2);
+}
 .about-card .name{font-family:var(--font-display);font-weight:700;font-size:26px;margin-bottom:4px;letter-spacing:-0.01em}
 .about-card .title{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px}
 .about-card .meta-list{display:flex;flex-direction:column;gap:12px;margin-top:24px;padding-top:24px;border-top:1px solid var(--stroke)}
@@ -864,7 +874,9 @@ footer{
 
     <div class="about-grid">
       <div class="about-card reveal">
-        <div class="init">JG</div>
+        <div class="avatar">
+          <img src="Profile_Pic.jpeg" alt="Jainam Gogree" loading="lazy" />
+        </div>
         <div class="name">Jainam Gogree</div>
         <div class="title">Data &amp; Business Analyst</div>
         <div class="meta-list">
@@ -904,6 +916,7 @@ footer{
       <button class="lab-tab active" data-view="radar"><span class="ic">◐</span>Skill Radar</button>
       <button class="lab-tab" data-view="classifier"><span class="ic">⊕</span>ML Classifier</button>
       <button class="lab-tab" data-view="sentiment"><span class="ic">✎</span>Sentiment Engine</button>
+      <button class="lab-tab" data-view="dataviz"><span class="ic">▤</span>Data Viz</button>
     </div>
 
     <div class="lab-panel">
@@ -1006,6 +1019,48 @@ footer{
               <label>Emotion breakdown (NRC-style)</label>
               <div class="lab-canvas-wrap" style="padding:12px">
                 <canvas id="emotionChart" height="180"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: DATA VIZ -->
+      <div class="lab-view" data-view="dataviz">
+        <div class="lab-head">
+          <h3>Public Dataset Explorer</h3>
+          <p>Pick a public dataset, switch chart types, and watch the visualization recompute live. Sample data is bundled in-page so you can play offline — swap in any CSV or REST endpoint to explore your own.</p>
+        </div>
+        <div class="lab-body">
+          <div class="lab-canvas-wrap" style="padding:20px">
+            <canvas id="dataVizChart" height="320"></canvas>
+            <div id="dataVizCaption" style="margin-top:14px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:0.05em"></div>
+          </div>
+          <div class="lab-controls">
+            <div class="lab-control">
+              <label>Dataset <span class="v" id="dataVizSource">—</span></label>
+              <div class="chip-row" id="datasetChips">
+                <div class="chip active" data-set="gdp">World GDP (Top 10)</div>
+                <div class="chip" data-set="co2">CO₂ by Region</div>
+                <div class="chip" data-set="iris">Iris Flowers</div>
+                <div class="chip" data-set="population">Population by Decade</div>
+                <div class="chip" data-set="happiness">Happiness Index</div>
+              </div>
+            </div>
+            <div class="lab-control">
+              <label>Chart type</label>
+              <div class="chip-row" id="chartTypeChips">
+                <div class="chip active" data-type="bar">Bar</div>
+                <div class="chip" data-type="line">Line</div>
+                <div class="chip" data-type="doughnut">Doughnut</div>
+                <div class="chip" data-type="scatter">Scatter</div>
+              </div>
+            </div>
+            <div class="lab-control">
+              <label>Summary stats</label>
+              <div class="lab-output" id="dataVizOutput"></div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="lab-btn secondary" id="downloadCsvBtn">Download CSV</button>
               </div>
             </div>
           </div>
@@ -1730,6 +1785,7 @@ document.querySelectorAll('.lab-tab').forEach(tab=>{
       if(v==='radar' && window.radarChart) window.radarChart.resize();
       if(v==='sentiment' && window.emoChart) window.emoChart.resize();
       if(v==='classifier') drawML();
+      if(v==='dataviz' && window.dataVizChart) window.dataVizChart.resize();
     },50);
   });
 });
@@ -1967,6 +2023,214 @@ setTimeout(()=>{
 
 // Redraw ML canvas when tab first becomes visible (in case canvas scaling is needed)
 window.addEventListener('load',()=>{drawML();});
+
+/* =========================================================
+   DATA VIZ — public-dataset explorer
+   ========================================================= */
+const datasets = {
+  gdp:{
+    title:'Top 10 economies by nominal GDP (2024)',
+    source:'World Bank · WDI 2024',
+    unit:'USD trillions',
+    labels:['USA','China','Germany','Japan','India','UK','France','Brazil','Italy','Canada'],
+    values:[27.36,17.79,4.46,4.21,3.55,3.34,3.03,2.13,2.05,2.14]
+  },
+  co2:{
+    title:'CO₂ emissions by region (2023)',
+    source:'Global Carbon Project · 2023',
+    unit:'Gt CO₂',
+    labels:['Asia-Pacific','North America','Europe','Middle East','Africa','South America','Oceania'],
+    values:[20.4,6.0,4.6,2.8,1.5,1.2,0.45]
+  },
+  iris:{
+    title:'Iris dataset · sepal length × petal length',
+    source:'Fisher 1936 · UCI ML Repository',
+    unit:'cm',
+    scatter:[
+      {label:'setosa',color:'#00e5ff',points:[[5.1,1.4],[4.9,1.4],[4.7,1.3],[4.6,1.5],[5.0,1.4],[5.4,1.7],[4.6,1.4],[5.0,1.5],[4.4,1.4],[4.9,1.5],[5.4,1.5],[4.8,1.6],[4.8,1.4],[4.3,1.1],[5.8,1.2],[5.7,1.5],[5.4,1.3],[5.1,1.4],[5.7,1.7],[5.1,1.5]]},
+      {label:'versicolor',color:'#b6f26a',points:[[7.0,4.7],[6.4,4.5],[6.9,4.9],[5.5,4.0],[6.5,4.6],[5.7,4.5],[6.3,4.7],[4.9,3.3],[6.6,4.6],[5.2,3.9],[5.0,3.5],[5.9,4.2],[6.0,4.0],[6.1,4.7],[5.6,3.6],[6.7,4.4],[5.6,4.5],[5.8,4.1],[6.2,4.5],[5.6,3.9]]},
+      {label:'virginica',color:'#ff3d9a',points:[[6.3,6.0],[5.8,5.1],[7.1,5.9],[6.3,5.6],[6.5,5.8],[7.6,6.6],[4.9,4.5],[7.3,6.3],[6.7,5.8],[7.2,6.1],[6.5,5.1],[6.4,5.3],[6.8,5.5],[5.7,5.0],[5.8,5.1],[6.4,5.3],[6.5,5.5],[7.7,6.7],[7.7,6.9],[6.0,5.0]]}
+    ]
+  },
+  population:{
+    title:'World population (1950 → 2020)',
+    source:'UN · World Population Prospects',
+    unit:'billions',
+    labels:['1950','1960','1970','1980','1990','2000','2010','2020'],
+    values:[2.54,3.03,3.70,4.46,5.33,6.15,6.96,7.84]
+  },
+  happiness:{
+    title:'World Happiness Index — top 8 (2024)',
+    source:'World Happiness Report 2024',
+    unit:'score / 10',
+    labels:['Finland','Denmark','Iceland','Sweden','Israel','Netherlands','Norway','Luxembourg'],
+    values:[7.74,7.58,7.53,7.34,7.34,7.32,7.30,7.12]
+  }
+};
+
+const dvCanvas = document.getElementById('dataVizChart');
+const dvCtx = dvCanvas.getContext('2d');
+const dvOutput = document.getElementById('dataVizOutput');
+const dvCaption = document.getElementById('dataVizCaption');
+const dvSourceLabel = document.getElementById('dataVizSource');
+const palette = ['#00e5ff','#ff3d9a','#b6f26a','#ffbe3d','#b794f4','#22d3ee','#f472b6','#fde68a','#86efac','#93c5fd'];
+
+let activeDataset = 'gdp';
+let activeChartType = 'bar';
+
+function buildChartConfig(setKey, type){
+  const d = datasets[setKey];
+  const isScatter = type === 'scatter';
+
+  // For scatter, only iris has scatter points; fallback to (index, value) pairs otherwise.
+  if(isScatter){
+    if(d.scatter){
+      return {
+        type:'scatter',
+        data:{datasets: d.scatter.map(g => ({
+          label:g.label, data:g.points.map(p=>({x:p[0],y:p[1]})),
+          backgroundColor:g.color, borderColor:g.color, pointRadius:5, pointHoverRadius:7
+        }))},
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{labels:{color:'#b5bccb',font:{family:'JetBrains Mono',size:10}}},tooltip:{backgroundColor:'rgba(10,13,20,0.95)',borderColor:'rgba(0,229,255,0.3)',borderWidth:1}},
+          scales:{
+            x:{title:{display:true,text:'Sepal length (cm)',color:'#8a92a6',font:{family:'JetBrains Mono',size:10}},grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#8a92a6',font:{family:'JetBrains Mono',size:9}}},
+            y:{title:{display:true,text:'Petal length (cm)',color:'#8a92a6',font:{family:'JetBrains Mono',size:10}},grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#8a92a6',font:{family:'JetBrains Mono',size:9}}}
+          }
+        }
+      };
+    }
+    return {
+      type:'scatter',
+      data:{datasets:[{label:d.title,data:d.labels.map((l,i)=>({x:i,y:d.values[i]})),backgroundColor:'#00e5ff',pointRadius:6,pointHoverRadius:8}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a92a6',font:{family:'JetBrains Mono',size:9},callback:v=>d.labels[v]||''},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#8a92a6',font:{family:'JetBrains Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+    };
+  }
+
+  if(d.scatter){
+    // collapse scatter dataset into per-class means for non-scatter chart types
+    const labels = d.scatter.map(g=>g.label);
+    const values = d.scatter.map(g => g.points.reduce((s,p)=>s+p[1],0)/g.points.length);
+    return baseConfig(type, labels, values, 'avg petal length (cm)');
+  }
+  return baseConfig(type, d.labels, d.values, d.unit);
+}
+
+function baseConfig(type, labels, values, unit){
+  const isLine = type === 'line';
+  const isDoughnut = type === 'doughnut';
+  const grad = dvCtx.createLinearGradient(0,0,0,300);
+  grad.addColorStop(0,'rgba(0,229,255,0.35)');
+  grad.addColorStop(1,'rgba(0,229,255,0)');
+  return {
+    type,
+    data:{
+      labels,
+      datasets:[{
+        label:unit,
+        data:values,
+        backgroundColor: isDoughnut ? labels.map((_,i)=>palette[i % palette.length]) : (isLine ? grad : '#00e5ff'),
+        borderColor: isLine ? '#00e5ff' : (isDoughnut ? '#06070b' : 'rgba(0,229,255,0.6)'),
+        borderWidth: isDoughnut ? 2 : (isLine ? 2 : 1),
+        fill: isLine,
+        tension: isLine ? 0.35 : 0,
+        pointRadius: isLine ? 3 : 0,
+        pointHoverRadius: isLine ? 6 : 0,
+        pointBackgroundColor:'#00e5ff',
+        borderRadius: type === 'bar' ? 6 : 0
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:isDoughnut,position:'right',labels:{color:'#b5bccb',font:{family:'JetBrains Mono',size:10},boxWidth:12}},
+        tooltip:{backgroundColor:'rgba(10,13,20,0.95)',borderColor:'rgba(0,229,255,0.3)',borderWidth:1,padding:10,titleFont:{size:11,family:'JetBrains Mono'},bodyFont:{size:11},callbacks:{label:c=>` ${c.parsed.y ?? c.parsed} ${unit}`}}
+      },
+      scales: isDoughnut ? {} : {
+        x:{grid:{display:false},ticks:{color:'#8a92a6',font:{family:'JetBrains Mono',size:9},maxRotation:0,autoSkip:true}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#8a92a6',font:{family:'JetBrains Mono',size:9},callback:v=>v+''}}
+      }
+    }
+  };
+}
+
+function summaryStats(setKey){
+  const d = datasets[setKey];
+  if(d.scatter){
+    const all = d.scatter.flatMap(g=>g.points.map(p=>p[1]));
+    const min = Math.min(...all), max = Math.max(...all);
+    const mean = (all.reduce((s,v)=>s+v,0)/all.length);
+    return [
+      ['classes', d.scatter.length],
+      ['samples', all.length],
+      ['min', min.toFixed(2)+' cm'],
+      ['max', max.toFixed(2)+' cm'],
+      ['mean', mean.toFixed(2)+' cm']
+    ];
+  }
+  const v = d.values;
+  const sum = v.reduce((a,b)=>a+b,0);
+  const mean = sum/v.length;
+  const min = Math.min(...v);
+  const max = Math.max(...v);
+  const sd = Math.sqrt(v.reduce((s,x)=>s+(x-mean)**2,0)/v.length);
+  return [
+    ['rows', v.length],
+    ['min', min.toFixed(2)+' '+d.unit],
+    ['max', max.toFixed(2)+' '+d.unit],
+    ['mean', mean.toFixed(2)+' '+d.unit],
+    ['σ (std dev)', sd.toFixed(2)]
+  ];
+}
+
+function renderDataViz(){
+  const d = datasets[activeDataset];
+  if(window.dataVizChart) window.dataVizChart.destroy();
+  window.dataVizChart = new Chart(dvCtx, buildChartConfig(activeDataset, activeChartType));
+  dvSourceLabel.textContent = d.source;
+  dvCaption.textContent = `// ${d.title}`;
+  dvOutput.innerHTML = summaryStats(activeDataset).map(([k,v])=>`<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+}
+
+function datasetToCsv(setKey){
+  const d = datasets[setKey];
+  if(d.scatter){
+    const rows = ['class,sepal_length_cm,petal_length_cm'];
+    d.scatter.forEach(g => g.points.forEach(p => rows.push(`${g.label},${p[0]},${p[1]}`)));
+    return rows.join('\n');
+  }
+  const header = `label,${d.unit.replace(/[^a-z0-9]+/gi,'_').toLowerCase()}`;
+  return [header, ...d.labels.map((l,i)=>`${l},${d.values[i]}`)].join('\n');
+}
+
+document.getElementById('datasetChips').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');if(!c)return;
+  document.querySelectorAll('#datasetChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');
+  activeDataset = c.dataset.set;
+  renderDataViz();
+});
+
+document.getElementById('chartTypeChips').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');if(!c)return;
+  document.querySelectorAll('#chartTypeChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');
+  activeChartType = c.dataset.type;
+  renderDataViz();
+});
+
+document.getElementById('downloadCsvBtn').addEventListener('click',()=>{
+  const csv = datasetToCsv(activeDataset);
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${activeDataset}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+renderDataViz();
 
 /* =========================================================
    BOOT — render initial page
